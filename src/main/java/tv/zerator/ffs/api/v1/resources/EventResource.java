@@ -62,6 +62,7 @@ public class EventResource extends ServerResource {
 	
 	@Delete
 	public Status deleteEvent() throws SQLException {
+   		ValidationUtils.verifyGroup(getRequest(), ApiV1.ADMIN);
 		mEvents.delete(mEventId);
 		return Status.SUCCESS_OK;
 	}

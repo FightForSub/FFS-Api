@@ -36,7 +36,7 @@ public class EventRoundResource extends ServerResource {
 	
 	@Delete
 	public Status deleteRound() throws SQLException {
-		ValidationUtils.verifyGroup(getRequest(), ApiV1.MODERATOR);
+		ValidationUtils.verifyGroup(getRequest(), ApiV1.ADMIN);
 		if (!mEvents.roundExists(mEventId, mRoundId)) throw new NotFoundException("Round not found.");
 		mEvents.deleteRound(mEventId, mRoundId);
 		return Status.SUCCESS_OK;
