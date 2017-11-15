@@ -28,6 +28,8 @@ git clone https://github.com/AlexMog/FFS-Api.git
 cd FFS-Api && mvn compile assembly:single
 ```
 
+You will need to install the SQL file into your database (located in the "database" directory)
+
 Then, copy and edit the project's settings in the build directory
 
 ```bash
