@@ -1,0 +1,30 @@
+# Web server config
+webserver.http.port=4000
+webserver.maxThreads=512
+
+# Twitch config
+twitch.user_url=https://api.twitch.tv/kraken/user
+twitch.client_id=cs5900eog2wajva8rnvf2jtx6gazsvd
+twitch.channels_url=https://api.twitch.tv/kraken/channels/
+twitch.accept_header=application/vnd.twitchtv.v5+json
+
+# BoneCP config
+bonecp.idleConnectionTestPeriodInMinutes=1
+bonecp.idleMaxAgeInMinutes=4
+bonecp.maxConnectionsPerPartition=60
+bonecp.minConnectionsPerPartition=1
+bonecp.poolAvailabilityThreshold=10
+bonecp.partitionCount=4
+bonecp.acquireIncrement=5
+bonecp.statementsCacheSize=50
+bonecp.connectionTestStatement=SELECT 1
+bonecp.lazyInit=true
+
+# Email service configuration
+mail.transport.protocol=smtp
+mail.smtp.host=ssl0.ovh.net
+mail.smtp.port=587
+mail.smtp.auth=true
+mail.smtp.auth.user=
+mail.smtp.auth.password=
+mail.from=
