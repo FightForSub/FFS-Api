@@ -19,7 +19,7 @@ public class Main extends ApiServer {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		new Main().start(null, new ApiEndpointBuilder("/v1", new ApiV1(instance.getConfig())));
+		new Main();
 	}
 	
 	private void initRabbitMQ() throws IOException {
@@ -30,6 +30,7 @@ public class Main extends ApiServer {
 	
 	public Main() throws Exception {
 		instance = this;
+		start(null, new ApiEndpointBuilder("/v1", new ApiV1(instance.getConfig())));
 		initRabbitMQ();
 	}
 }
