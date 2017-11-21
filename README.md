@@ -10,7 +10,7 @@ By contributing or using this project, you agree to abide by the [Code of Conduc
 
 ## Documentation
 
-The API Endpoints documentation can be found [here]()
+The API Endpoints documentation can be found [here](https://github.com/AlexMog/FFS-Documentation/tree/master/Doc/API/v1)
 
 ## Build and run
 
@@ -48,11 +48,15 @@ cd target && java -jar ffs-api-{VERSION}-jar-with-dependencies.jar
 
 ## Bug Report
 
-If you find any bugs, please report it on the [Issues](https://gitlab.com/AlexMog/FFS-Api/issues) page of the project
+If you find any bugs, please report it on the [Issues](https://github.com/AlexMog/FFS-Api/issues) page of the project
 
 ## Deployment
 
-TODO
+To use the project, you will need to install a [RabbitMQ](https://www.rabbitmq.com/) server.  
+It's used by the project for its internal messaging system between the API and the PubSub service.  
+Create a VirtualHost for the project.  
+
+TODO NEXT STEPS
 
 ## Built with
 
