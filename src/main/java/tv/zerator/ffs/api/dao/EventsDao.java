@@ -353,6 +353,20 @@ public class EventsDao extends DAO<EventBean> {
 		}
 	}
 	
+	public UserStatus getUserStatusFromEmailKey(int eventId, int accountId, String emailKey) throws SQLException {
+		try (Connection conn = mDataSource.getConnection();
+				PreparedStatementHandle prep = (PreparedStatementHandle) conn.prepareStatement("SELECT status FROM account_event_status "
+						+ "WHERE event_id = ? AND account_id = ? AND email_activation_key = ?")) {
+			prep.setInt(1, eventId);
+			prep.setInt(2, accountId);
+			prep.setString(3, emailKey);
+			try (ResultSet rs = prep.executeQuery()) {
+				if (rs.next()) return UserStatus.valueOf(rs.getString("status"));
+				return null;
+			}
+		}
+	}
+	
 	public static @Data class AccountEventBean {
 		public EventBean event;
 		public UserStatus status;
