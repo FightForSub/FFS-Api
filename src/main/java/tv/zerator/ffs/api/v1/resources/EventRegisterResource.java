@@ -39,7 +39,6 @@ import tv.zerator.ffs.api.dao.EventsDao;
 import tv.zerator.ffs.api.dao.EventsDao.UserStatus;
 import tv.zerator.ffs.api.dao.beans.AccountBean;
 import tv.zerator.ffs.api.dao.beans.AccountBean.BroadcasterType;
-import tv.zerator.ffs.api.v1.ApiV1;
 import tv.zerator.ffs.api.v1.resources.LoginResource.TwitchChannelObject;
 import tv.zerator.ffs.api.dao.beans.EventBean;
 

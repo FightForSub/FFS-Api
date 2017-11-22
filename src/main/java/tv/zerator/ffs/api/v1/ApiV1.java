@@ -11,6 +11,7 @@ import tv.zerator.ffs.api.v1.authorizers.GroupAuthorizer;
 import tv.zerator.ffs.api.v1.resources.AwaitingForActivationResource;
 import tv.zerator.ffs.api.v1.resources.BannedResource;
 import tv.zerator.ffs.api.v1.resources.EventCurrentResource;
+import tv.zerator.ffs.api.v1.resources.EventRegisterResource;
 import tv.zerator.ffs.api.v1.resources.EventResource;
 import tv.zerator.ffs.api.v1.resources.EventRoundResource;
 import tv.zerator.ffs.api.v1.resources.EventRoundUserScoreResource;
@@ -49,7 +50,6 @@ public class ApiV1 extends ApiBase {
 		router.attach("/event/{EVENT_ID}/user/{USER_ID}", EventUserResource.class);
 		router.attach("/event/{EVENT_ID}/rounds", EventRoundsResource.class);
 		router.attach("/event/{EVENT_ID}/round/{ROUND_ID}", EventRoundResource.class);
-//		router.attach("/event/{EVENT_ID}/register", null);
 	}
 
 	@Override
@@ -64,6 +64,7 @@ public class ApiV1 extends ApiBase {
 			router.attachDefault(BannedResource.class);
 			break;
 		case USER:
+			router.attach("/event/{EVENT_ID}/register", EventRegisterResource.class);
 			break;
 		case MODERATOR:
 			router.attach("/event/{EVENT_ID}/round/{ROUND_ID}/score/{USER_ID}", EventRoundUserScoreResource.class);
