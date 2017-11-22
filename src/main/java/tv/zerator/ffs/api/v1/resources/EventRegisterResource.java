@@ -81,7 +81,7 @@ public class EventRegisterResource extends ServerResource {
 		if (event.getStatus() != EventBean.Status.OPEN) throw new ConflictException("The event is not opened.");
 
 		AccountBean acc = (AccountBean) getRequest().getAttributes().get("account");
-		if (mEvents.getRegistered(mEventId, acc.getTwitchId()) != null) throw new NotFoundException("You are already registered to this event.");
+		if (mEvents.getRegistered(mEventId, acc.getTwitchId()) != null) throw new ConflictException("You are already registered to this event.");
 		
 		if (!event.isReservedToAffiliates() && !event.isReservedToPartners()
 				|| event.isReservedToAffiliates() && acc.getBroadcasterType() == BroadcasterType.affiliate
