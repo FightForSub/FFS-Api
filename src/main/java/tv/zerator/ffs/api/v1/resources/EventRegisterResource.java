@@ -36,6 +36,8 @@ public class EventRegisterResource extends ServerResource {
 	public Status registerToEvent() throws SQLException {
 		EventBean event = mEvents.getEvent(mEventId);
 		if (event == null) throw new NotFoundException("Event not found.");
+		
+		if (event.getStatus() != EventBean.Status.OPEN) throw new ConflictException("The event is not opened.");
 
 		AccountBean acc = (AccountBean) getRequest().getAttributes().get("account");
 		if (mEvents.getRegistered(mEventId, acc.getTwitchId()) != null) throw new NotFoundException("You are already registered to this event.");
