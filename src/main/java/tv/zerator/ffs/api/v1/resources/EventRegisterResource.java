@@ -146,7 +146,9 @@ public class EventRegisterResource extends ServerResource {
 	
 	@Delete
 	public void unregisterToEvent() throws SQLException {
-		if (mEvents.getEvent(mEventId) == null) throw new NotFoundException("Event not found.");
+		EventBean event = mEvents.getEvent(mEventId);
+		if (event == null) throw new NotFoundException("Event not found.");
+		if (event.getStatus() != EventBean.Status.OPEN) throw new ConflictException("Event is not opened.");
 		
 		AccountBean acc = (AccountBean) getRequest().getAttributes().get("account");
 		if (mEvents.getRegistered(mEventId, acc.getTwitchId()) == null) throw new NotFoundException("Not registered to this event.");
