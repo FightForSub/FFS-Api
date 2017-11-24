@@ -17,7 +17,7 @@ The API Endpoints documentation can be found [here](https://github.com/AlexMog/F
 First of all clone and build the project's Framework
 
 ```bash
-git clone https://gitlab.com/AlexMog/ApiLib.git
+git clone https://github.com/AlexMog/ApiLib.git
 cd ApiLib && mvn install
 ```
 
