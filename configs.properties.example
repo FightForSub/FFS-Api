@@ -28,3 +28,7 @@ mail.smtp.auth=true
 mail.smtp.auth.user=
 mail.smtp.auth.password=
 mail.from=
+
+# RabbitMQ configuration
+rabbitmq.active=true
+rabbitmq.uri=amqp://test:test@localhost/ffs
