@@ -352,4 +352,76 @@ public class EventsDao extends DAO<EventBean> {
 			}
 		}
 	}
+	
+	public UserStatus getUserStatusFromEmailKey(int eventId, int accountId, String emailKey) throws SQLException {
+		try (Connection conn = mDataSource.getConnection();
+				PreparedStatementHandle prep = (PreparedStatementHandle) conn.prepareStatement("SELECT status FROM account_event_status "
+						+ "WHERE event_id = ? AND account_id = ? AND email_activation_key = ?")) {
+			prep.setInt(1, eventId);
+			prep.setInt(2, accountId);
+			prep.setString(3, emailKey);
+			try (ResultSet rs = prep.executeQuery()) {
+				if (rs.next()) return UserStatus.valueOf(rs.getString("status"));
+				return null;
+			}
+		}
+	}
+	
+	public static @Data class AccountEventBean {
+		public EventBean event;
+		public UserStatus status;
+	}
+	
+	public List<AccountEventBean> getEventsForAccount(int accountId) throws SQLException {
+		try (Connection conn = mDataSource.getConnection();
+				PreparedStatementHandle prep = (PreparedStatementHandle) conn.prepareStatement("SELECT s.status, e.id, e.name, e.description, e.status, e.reserved_to_affiliates, e.reserved_to_partners, e.is_current "
+						+ "FROM events e LEFT JOIN account_event_status s ON s.event_id = e.id WHERE s.account_id = ?")) {
+			prep.setInt(1, accountId);
+			try (ResultSet rs = prep.executeQuery()) {
+				List<AccountEventBean> ret = new ArrayList<>();
+				while (rs.next()) {
+				AccountEventBean bean = new AccountEventBean();
+				EventBean event = new EventBean();
+					event.setCurrent(rs.getBoolean("e.is_current"));
+					event.setDescription(rs.getString("e.description"));
+					event.setId(rs.getInt("e.id"));
+					event.setName(rs.getString("e.name"));
+					event.setReservedToAffiliates(rs.getBoolean("e.reserved_to_affiliates"));
+					event.setReservedToPartners(rs.getBoolean("e.reserved_to_partners"));
+					event.setStatus(EventBean.Status.valueOf(rs.getString("e.status")));
+					bean.setEvent(event);
+					bean.setStatus(UserStatus.valueOf(rs.getString("s.status")));
+					ret.add(bean);
+				}
+				return ret;
+			}
+		}
+	}
+	
+	public List<AccountEventBean> getEventsForAccountAndStatus(int accountId, UserStatus status) throws SQLException {
+		try (Connection conn = mDataSource.getConnection();
+				PreparedStatementHandle prep = (PreparedStatementHandle) conn.prepareStatement("SELECT s.status, e.name, e.description, e.status, e.reserved_to_affiliates, e.reserved_to_partners, e.is_current "
+						+ "FROM events e LEFT JOIN account_event_status s ON s.event_id = e.id WHERE s.account_id = ? AND s.status = ?")) {
+			prep.setInt(1, accountId);
+			prep.setString(2, status.name());
+			try (ResultSet rs = prep.executeQuery()) {
+				List<AccountEventBean> ret = new ArrayList<>();
+				while (rs.next()) {
+				AccountEventBean bean = new AccountEventBean();
+				EventBean event = new EventBean();
+					event.setCurrent(rs.getBoolean("e.is_current"));
+					event.setDescription(rs.getString("e.description"));
+					event.setId(rs.getInt("e.id"));
+					event.setName(rs.getString("e.name"));
+					event.setReservedToAffiliates(rs.getBoolean("e.reserved_to_affiliates"));
+					event.setReservedToPartners(rs.getBoolean("e.reserved_to_partners"));
+					event.setStatus(EventBean.Status.valueOf(rs.getString("e.status")));
+					bean.setEvent(event);
+					bean.setStatus(UserStatus.valueOf(rs.getString("s.status")));
+					ret.add(bean);
+				}
+				return ret;
+			}
+		}
+	}
 }
