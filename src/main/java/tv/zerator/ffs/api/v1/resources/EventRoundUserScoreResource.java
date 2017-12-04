@@ -36,11 +36,11 @@ public class EventRoundUserScoreResource extends ServerResource {
 	
 	@Put
 	public Status updateScore(UpdateScoreEntity entity) throws SQLException {
-		if (entity == null) throw new BadEntityException("entity not found.");
+		if (entity == null) throw new BadEntityException("ENTITY_NOT_FOUND");
 
-		if (mEvents.getEvent(mEventId) == null) throw new NotFoundException("Event not found.");
-		if (!mEvents.roundExists(mEventId, mRoundId)) throw new NotFoundException("Round not found.");
-		if (mEvents.getRegistered(mEventId, mUserId) == null) throw new NotFoundException("User not found on this event.");
+		if (mEvents.getEvent(mEventId) == null) throw new NotFoundException("EVENT_NOT_FOUND");
+		if (!mEvents.roundExists(mEventId, mRoundId)) throw new NotFoundException("ROUND_NOT_FOUND");
+		if (mEvents.getRegistered(mEventId, mUserId) == null) throw new NotFoundException("USER_NOT_REGISTERED");
 		
 		if (mEvents.getScore(mRoundId, mUserId) != null) mEvents.updateScore(mRoundId, mUserId, entity.score);
 		else mEvents.addScore(mRoundId, mUserId, entity.score);

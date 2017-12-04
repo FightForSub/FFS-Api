@@ -87,13 +87,13 @@ public class LoginResource extends ServerResource {
 	@Get
 	public Status validateEmail() throws SQLException {
 		String code = getQuery().getValues("code");
-		if (code == null) throw new BadEntityException("Code not found.");
+		if (code == null) throw new BadEntityException("CODE_NOT_FOUND");
 		AccountBean bean = mAccounts.getFromValidationCode(code);
 		if (bean != null) {
-			if (bean.getGrade() != 0) throw new ConflictException("Code already validated.");
+			if (bean.getGrade() != 0) throw new ConflictException("CODE_ALREADY_VALIDATED");
 			bean.setGrade(ApiV1.USER);
 			mAccounts.update(bean);
-		} else throw new NotFoundException("Code cannot be validated.");
+		} else throw new NotFoundException("CODE_UNKNOWN");
 		return Status.SUCCESS_OK;
 	}
 	
@@ -103,9 +103,9 @@ public class LoginResource extends ServerResource {
 		
 		if (entity == null) throw new BadEntityException("Entity not found.");
 		
-		err.verifyFieldEmptyness("twitch_token", entity.twitch_token, 5);
+		err.verifyFieldEmptyness("twitch_token", entity.twitch_token, 1);
 		
-		err.checkErrors("Cannot login");
+		err.checkErrors("LOGIN_ERROR");
 		
 		String json = null;
 		int retCode = 200;
@@ -127,7 +127,7 @@ public class LoginResource extends ServerResource {
 			httpGet.releaseConnection();
 			
 			userObject = mMapper.readValue(json, TwitchUserObject.class);
-			if (retCode != 200 || userObject.error != null) throw new BadAuthenticationException("Bad twitch authentication.");
+			if (retCode != 200 || userObject.error != null) throw new BadAuthenticationException("BAD_AUTHENTICATION");
 			
 			httpGet.setURI(new URI(mTwitchChannelUrl + userObject._id));
 
@@ -140,7 +140,7 @@ public class LoginResource extends ServerResource {
 			httpGet.releaseConnection();
 			
 			TwitchChannelObject channelObject = mMapper.readValue(json, TwitchChannelObject.class);
-			if (retCode != 200 || channelObject.error != null) throw new BadAuthenticationException("Cannot retrive channel data.");
+			if (retCode != 200 || channelObject.error != null) throw new BadAuthenticationException("CHANNEL_NOT_FOUND_ON_TWITCH_API");
 			
 			AccountBean acc = mAccounts.get(channelObject._id);
 			if (acc == null) {
@@ -183,7 +183,7 @@ public class LoginResource extends ServerResource {
 			ret.expires_in = 86400000;
 		} catch (URISyntaxException | IOException e) {
 			Main.LOGGER.log(Level.SEVERE, "Impossible to login", e);
-			throw new InternalServerError("Cannot verify your authentication. Try contacting an admin.");
+			throw new InternalServerError("TWITCH_API_ERROR");
 		}
 		return ret;
 	}

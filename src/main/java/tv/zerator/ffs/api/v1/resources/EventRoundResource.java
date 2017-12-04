@@ -30,14 +30,14 @@ public class EventRoundResource extends ServerResource {
 	
 	@Get
 	public List<RoundUserScoreBean> getRound() throws SQLException {
-		if (!mEvents.roundExists(mEventId, mRoundId)) throw new NotFoundException("Round not found.");
+		if (!mEvents.roundExists(mEventId, mRoundId)) throw new NotFoundException("ROUND_NOT_FOUND");
 		return mEvents.getScores(mRoundId);
 	}
 	
 	@Delete
 	public Status deleteRound() throws SQLException {
 		ValidationUtils.verifyGroup(getRequest(), ApiV1.ADMIN);
-		if (!mEvents.roundExists(mEventId, mRoundId)) throw new NotFoundException("Round not found.");
+		if (!mEvents.roundExists(mEventId, mRoundId)) throw new NotFoundException("ROUND_NOT_FOUND");
 		mEvents.deleteRound(mEventId, mRoundId);
 		return Status.SUCCESS_OK;
 	}

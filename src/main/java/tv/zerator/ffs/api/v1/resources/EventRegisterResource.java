@@ -76,12 +76,12 @@ public class EventRegisterResource extends ServerResource {
 	@Post
 	public Status registerToEvent() throws SQLException {
 		EventBean event = mEvents.getEvent(mEventId);
-		if (event == null) throw new NotFoundException("Event not found.");
+		if (event == null) throw new NotFoundException("EVENT_NOT_FOUND");
 		
-		if (event.getStatus() != EventBean.Status.OPEN) throw new ConflictException("The event is not opened.");
+		if (event.getStatus() != EventBean.Status.OPEN) throw new ConflictException("EVENT_NOT_OPENED");
 
 		AccountBean acc = (AccountBean) getRequest().getAttributes().get("account");
-		if (mEvents.getRegistered(mEventId, acc.getTwitchId()) != null) throw new ConflictException("You are already registered to this event.");
+		if (mEvents.getRegistered(mEventId, acc.getTwitchId()) != null) throw new ConflictException("ALREADY_REGISTERED");
 		
 		if (!event.isReservedToAffiliates() && !event.isReservedToPartners()
 				|| event.isReservedToAffiliates() && acc.getBroadcasterType() == BroadcasterType.affiliate
@@ -104,7 +104,7 @@ public class EventRegisterResource extends ServerResource {
 				httpGet.releaseConnection();
 				
 				TwitchChannelObject channelObject = mMapper.readValue(json, TwitchChannelObject.class);
-				if (retCode != 200 || channelObject.error != null) throw new NotFoundException("Channel not found on twitch api.");
+				if (retCode != 200 || channelObject.error != null) throw new NotFoundException("CHANNEL_NOT_FOUND_ON_TWITCH_API");
 				
 				acc.setBroadcasterType(channelObject.broadcaster_type == null || channelObject.broadcaster_type.length() == 0 ? BroadcasterType.none : BroadcasterType.valueOf(channelObject.broadcaster_type));
 				acc.setFollowers(channelObject.followers);
@@ -116,28 +116,31 @@ public class EventRegisterResource extends ServerResource {
 
 				mAccounts.update(acc);
 
+				if (acc.getViews() < event.getMinimumViews()) throw new ConflictException("NEED_MORE_VIEWS");
+				if (acc.getFollowers() < event.getMinimumFollowers()) throw new ConflictException("NEED_MORE_FOLLOWERS");
+				
 				mEvents.registerUser(mEventId, acc.getTwitchId(), UserStatus.AWAITING_FOR_ADMIN_VALIDATION, UUID.randomUUID().toString());
 			} catch (URISyntaxException | IOException e) {
 				Main.LOGGER.log(Level.SEVERE, "Impossible to login", e);
-				throw new InternalServerError("Cannot verify your authentication. Try contacting an admin.");
+				throw new InternalServerError("TWITCH_API_ERROR");
 			}
 			return Status.SUCCESS_OK;
-		} else throw new ConflictException("You are not eligible for this event.");
+		} else throw new ConflictException("NOT_ELIGIBLE");
 	}
 	
 	@Put
 	public Status updatePariticipationStatus(EmailValidationBean bean) throws SQLException {
-		if (bean == null) throw new BadEntityException("Entity not found.");
+		if (bean == null) throw new BadEntityException("EVENT_NOT_FOUND");
 		ValidationErrors err = new ValidationErrors();
 		
 		err.verifyFieldEmptyness("key", bean.key, 5, 36);
 		
-		err.checkErrors("Cannot validate key format.");
+		err.checkErrors("INVALID_KEY");
 
 		AccountBean acc = (AccountBean) getRequest().getAttributes().get("account");
 		UserStatus status = mEvents.getUserStatusFromEmailKey(mEventId, acc.getTwitchId(), bean.key);
-		if (status == null) throw new NotFoundException("Not registered or bad key.");
-		if (status != UserStatus.AWAITING_FOR_EMAIL_VALIDATION) throw new ConflictException("You are not validated for this event yet.");
+		if (status == null) throw new NotFoundException("UNKNOWN_KEY");
+		if (status != UserStatus.AWAITING_FOR_EMAIL_VALIDATION) throw new ConflictException("BAD_STATUS");
 		
 		mEvents.updateUser(mEventId, acc.getTwitchId(), UserStatus.VALIDATED);
 		
@@ -147,11 +150,11 @@ public class EventRegisterResource extends ServerResource {
 	@Delete
 	public void unregisterToEvent() throws SQLException {
 		EventBean event = mEvents.getEvent(mEventId);
-		if (event == null) throw new NotFoundException("Event not found.");
-		if (event.getStatus() != EventBean.Status.OPEN) throw new ConflictException("Event is not opened.");
+		if (event == null) throw new NotFoundException("EVENT_NOT_FOUND");
+		if (event.getStatus() != EventBean.Status.OPEN) throw new ConflictException("EVENT_NOT_OPENED");
 		
 		AccountBean acc = (AccountBean) getRequest().getAttributes().get("account");
-		if (mEvents.getRegistered(mEventId, acc.getTwitchId()) == null) throw new NotFoundException("Not registered to this event.");
+		if (mEvents.getRegistered(mEventId, acc.getTwitchId()) == null) throw new NotFoundException("NOT_REGISTERED");
 		
 		mEvents.removeUser(mEventId, acc.getTwitchId());
 	}

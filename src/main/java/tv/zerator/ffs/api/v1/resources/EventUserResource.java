@@ -38,7 +38,7 @@ public class EventUserResource extends ServerResource {
 	@Get
 	public UserRepresentation getUser() throws SQLException {
 		AccountStatusBean bean = mEvents.getRegistered(mEventId, mUserId);
-		if (bean == null) throw new NotFoundException("User not found on this event.");
+		if (bean == null) throw new NotFoundException("USER_NOT_REGISTERED");
 
 		Object obj = getRequest().getAttributes().get("account");
 		boolean isModerator = obj == null ? false : ((AccountBean) obj).getGrade() >= ApiV1.MODERATOR;
@@ -51,10 +51,10 @@ public class EventUserResource extends ServerResource {
 	public Status updateUser(UpdateUserEntity entity) throws SQLException {
 		ValidationUtils.verifyGroup(getRequest(), ApiV1.MODERATOR);
 		
-		if (entity == null) throw new BadEntityException("Entity not found.");
+		if (entity == null) throw new BadEntityException("ENTITY_NOT_FOUND");
 
 		AccountStatusBean bean = mEvents.getRegistered(mEventId, mUserId);
-		if (bean == null) throw new NotFoundException("User not found on this event.");
+		if (bean == null) throw new NotFoundException("USER_NOT_REGISTERED");
 		
 		mEvents.updateUser(mEventId, mUserId, entity.status);
 		return Status.SUCCESS_OK;
@@ -65,7 +65,7 @@ public class EventUserResource extends ServerResource {
 		ValidationUtils.verifyGroup(getRequest(), ApiV1.MODERATOR);
 
 		AccountStatusBean bean = mEvents.getRegistered(mEventId, mUserId);
-		if (bean == null) throw new NotFoundException("User not found on this event.");
+		if (bean == null) throw new NotFoundException("USER_NOT_REGISTERED");
 		
 		mEvents.removeUser(mEventId, mUserId);
 		return Status.SUCCESS_OK;

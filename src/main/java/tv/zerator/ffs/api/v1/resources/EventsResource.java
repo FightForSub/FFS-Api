@@ -32,19 +32,19 @@ public class EventsResource extends ServerResource {
 		try {
 			if (statusStr != null) status = EventBean.Status.valueOf(statusStr);
 		} catch (Exception e) {
-			throw new BadEntityException("'status' value invalid.");
+			throw new BadEntityException("STATUS_VALUE_INVALID");
 		}
 		
 		try {
 			if (startStr != null) start = Integer.parseInt(startStr);
 		} catch (Exception e) {
-			throw new BadEntityException("'start' must be numeric.");
+			throw new BadEntityException("START_VALUE_INVALID");
 		}
 		
 		try {
 			if (endStr != null) end = Integer.parseInt(endStr);
 		} catch (Exception e) {
-			throw new BadEntityException("'end' must be numeric.");
+			throw new BadEntityException("END_VALUE_INVALID");
 		}
 		
 		if (end > 50) end = 50;
@@ -57,12 +57,12 @@ public class EventsResource extends ServerResource {
 		ValidationUtils.verifyGroup(getRequest(), ApiV1.ADMIN);
 		ValidationErrors err = new ValidationErrors();
 		
-		if (entity == null) throw new BadEntityException("Entity not found.");
+		if (entity == null) throw new BadEntityException("ENTITY_NOT_FOUND");
 		
 		err.verifyFieldEmptyness("name", entity.name, 3, 200);
 		err.verifyFieldEmptyness("description", entity.description, 3, 2048);
 		
-		err.checkErrors("Cannot create event");
+		err.checkErrors("CREATE_EVENT_ERROR");
 		
 		EventBean data = new EventBean();
 		data.setDescription(entity.description);
@@ -70,6 +70,8 @@ public class EventsResource extends ServerResource {
 		data.setReservedToAffiliates(entity.reserved_to_affiliates);
 		data.setReservedToPartners(entity.reserved_to_partners);
 		data.setStatus(entity.status);
+		data.setMinimumViews(entity.minimum_views);
+		data.setMinimumFollowers(entity.minimum_followers);
 		
 		return new CreatedBean(mEvents.insert(data));
 	}
@@ -77,6 +79,7 @@ public class EventsResource extends ServerResource {
 	private static class EventCreateEntity {
 		public String name, description;
 		public boolean reserved_to_affiliates, reserved_to_partners;
+		public int minimum_views, minimum_followers;
 		public EventBean.Status status;
 	}
 }

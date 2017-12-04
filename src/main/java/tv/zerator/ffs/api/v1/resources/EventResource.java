@@ -32,7 +32,7 @@ public class EventResource extends ServerResource {
 	@Get
 	public EventBean getEvent() throws SQLException {
 		EventBean event = mEvents.getEvent(mEventId);
-		if (event == null) throw new NotFoundException("Event not found.");
+		if (event == null) throw new NotFoundException("EVENT_NOT_FOUND");
 		return event;
 	}
 	
@@ -41,21 +41,23 @@ public class EventResource extends ServerResource {
 		ValidationUtils.verifyGroup(getRequest(), ApiV1.ADMIN);
 		ValidationErrors err = new ValidationErrors();
 		
-		if (entity == null) throw new BadEntityException("Entity not found.");
+		if (entity == null) throw new BadEntityException("ENTITY_NOT_FOUND");
 		
 		err.verifyFieldEmptyness("name", entity.name, 3, 200);
 		err.verifyFieldEmptyness("description", entity.description, 3, 2048);
 		
-		err.checkErrors("Cannot create event");
+		err.checkErrors("EVENT_UPDATE_ERROR");
 		
 		EventBean bean = mEvents.getEvent(mEventId);
-		if (bean == null) throw new NotFoundException("Event not found.");
+		if (bean == null) throw new NotFoundException("EVENT_NOT_FOUND");
 		bean.setCurrent(entity.current);
 		bean.setDescription(entity.description);
 		bean.setName(entity.name);
 		bean.setReservedToAffiliates(entity.reserved_to_affiliates);
 		bean.setReservedToPartners(entity.reserved_to_partners);
 		bean.setStatus(entity.status);
+		bean.setMinimumViews(entity.minimum_views);
+		bean.setMinimumFollowers(entity.minimum_followers);
 		mEvents.update(bean);
 		return Status.SUCCESS_OK;
 	}
@@ -70,6 +72,7 @@ public class EventResource extends ServerResource {
 	private static class UpdateEventEntity {
 		public String name, description;
 		public boolean current, reserved_to_affiliates, reserved_to_partners;
+		public int minimum_views, minimum_followers;
 		public EventBean.Status status;
 	}
 }
