@@ -28,14 +28,14 @@ public class EventRoundsResource extends ServerResource {
 	
 	@Get
 	public List<Integer> getRounds() throws SQLException {
-		if (mEvents.getEvent(mEventId) == null) throw new NotFoundException("Event not found.");
+		if (mEvents.getEvent(mEventId) == null) throw new NotFoundException("EVENT_NOT_FOUND");
 		return mEvents.getRounds(mEventId);
 	}
 	
 	@Post
 	public CreatedBean addRound() throws SQLException {
 		ValidationUtils.verifyGroup(getRequest(), ApiV1.MODERATOR);
-		if (mEvents.getEvent(mEventId) == null) throw new NotFoundException("Event not found.");
+		if (mEvents.getEvent(mEventId) == null) throw new NotFoundException("EVENT_NOT_FOUND");
 		return new CreatedBean(mEvents.addRound(mEventId));
 	}
 }

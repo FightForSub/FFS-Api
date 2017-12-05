@@ -84,10 +84,10 @@ public class EventUsersResource extends ServerResource {
 		try {
 			if (statusStr != null) status = EventsDao.UserStatus.valueOf(statusStr);
 		} catch (Exception e) {
-			throw new BadEntityException("'status' bad format.");
+			throw new BadEntityException("STATUS_BAD_FORMAT");
 		}
 		
-		if (mEvents.getEvent(mEventId) == null) throw new NotFoundException("Event not found.");
+		if (mEvents.getEvent(mEventId) == null) throw new NotFoundException("EVENT_NOT_FOUND");
 		
 		Object obj = getRequest().getAttributes().get("account");
 		boolean isModerator = obj == null ? false : ((AccountBean) obj).getGrade() >= ApiV1.MODERATOR;
@@ -104,10 +104,10 @@ public class EventUsersResource extends ServerResource {
 	@Post
 	public Status registerUser(RegisterUserEntity entity) throws SQLException {
 		ValidationUtils.verifyGroup(getRequest(), ApiV1.MODERATOR);
-		if (entity == null) throw new BadEntityException("Entity not found.");
-		if (entity.status == null) throw new BadEntityException("Status is null.");
-		if (mEvents.getEvent(mEventId) == null) throw new NotFoundException("Event not found.");
-		if (mEvents.getRegistered(mEventId, entity.twitch_id) != null) throw new ConflictException("User already registered on this event.");
+		if (entity == null) throw new BadEntityException("ENTITY_NOT_FOUND");
+		if (entity.status == null) throw new BadEntityException("STATUS_IS_NULL");
+		if (mEvents.getEvent(mEventId) == null) throw new NotFoundException("EVENT_NOT_FOUND");
+		if (mEvents.getRegistered(mEventId, entity.twitch_id) != null) throw new ConflictException("USER_ALREADY_REGISTERED");
 		try {
 			String json;
 			int retCode;
@@ -126,7 +126,7 @@ public class EventUsersResource extends ServerResource {
 			httpGet.releaseConnection();
 			
 			TwitchChannelObject channelObject = mMapper.readValue(json, TwitchChannelObject.class);
-			if (retCode != 200 || channelObject.error != null) throw new NotFoundException("Channel not found on twitch api.");
+			if (retCode != 200 || channelObject.error != null) throw new NotFoundException("CHANNEL_NOT_FOUND_ON_TWITCH_API");
 			
 			boolean accountNew = false;
 			AccountBean acc = mAccounts.get(channelObject._id);
@@ -152,7 +152,7 @@ public class EventUsersResource extends ServerResource {
 			mEvents.registerUser(mEventId, acc.getTwitchId(), entity.status, UUID.randomUUID().toString());
 		} catch (URISyntaxException | IOException e) {
 			Main.LOGGER.log(Level.SEVERE, "Impossible to login", e);
-			throw new InternalServerError("Cannot verify your authentication. Try contacting an admin.");
+			throw new InternalServerError("TWITCH_API_ERROR");
 		}
 		
 		return Status.SUCCESS_OK;

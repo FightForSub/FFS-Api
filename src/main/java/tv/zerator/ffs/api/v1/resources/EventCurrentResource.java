@@ -17,7 +17,7 @@ public class EventCurrentResource extends ServerResource {
 	@Get
 	public EventBean getCurrent() throws SQLException {
 		EventBean bean = mEvents.getCurrent();
-		if (bean == null) throw new NotFoundException("No current found.");
+		if (bean == null) throw new NotFoundException("NO_EVENT");
 		return bean;
 	}
 }

@@ -28,13 +28,15 @@ public class EventsDao extends DAO<EventBean> {
 	public int insert(EventBean data) throws SQLException {
 		try (Connection conn = mDataSource.getConnection();
 				PreparedStatementHandle prep = (PreparedStatementHandle) conn.prepareStatement("INSERT INTO events "
-						+ "(name, description, status, reserved_to_affiliates, reserved_to_partners) VALUES "
-						+ "(?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS)) {
+						+ "(name, description, status, reserved_to_affiliates, reserved_to_partners, minimum_views, minimum_followers) VALUES "
+						+ "(?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS)) {
 			prep.setString(1, data.getName());
 			prep.setString(2, data.getDescription());
 			prep.setString(3, data.getStatus().name());
 			prep.setBoolean(4, data.isReservedToAffiliates());
 			prep.setBoolean(5, data.isReservedToPartners());
+			prep.setInt(6, data.getMinimumViews());
+			prep.setInt(7, data.getMinimumFollowers());
 			prep.executeUpdate();
 			try (ResultSet rs = prep.getGeneratedKeys()) {
 				if (rs.next()) return rs.getInt(1);
@@ -52,6 +54,8 @@ public class EventsDao extends DAO<EventBean> {
 		bean.setReservedToAffiliates(rs.getBoolean("reserved_to_affiliates"));
 		bean.setReservedToPartners(rs.getBoolean("reserved_to_partners"));
 		bean.setStatus(EventBean.Status.valueOf(rs.getString("status")));
+		bean.setMinimumViews(rs.getInt("minimum_views"));
+		bean.setMinimumFollowers(rs.getInt("minimum_followers"));
 		return bean;
 	}
 	
@@ -108,14 +112,16 @@ public class EventsDao extends DAO<EventBean> {
 		try (Connection conn = mDataSource.getConnection();
 				PreparedStatementHandle prep = (PreparedStatementHandle) conn.prepareStatement("UPDATE events SET "
 						+ "name = ?, description = ?, status = ?, reserved_to_affiliates = ?, "
-						+ "reserved_to_partners = ?, is_current = ? WHERE id = ?")) {
+						+ "reserved_to_partners = ?, is_current = ?, minimum_views = ?, minimum_followers = ? WHERE id = ?")) {
 			prep.setString(1, data.getName());
 			prep.setString(2, data.getDescription());
 			prep.setString(3, data.getStatus().name());
 			prep.setBoolean(4, data.isReservedToAffiliates());
 			prep.setBoolean(5, data.isReservedToPartners());
 			prep.setBoolean(6, data.isCurrent());
-			prep.setInt(7, data.getId());
+			prep.setInt(7, data.getMinimumViews());
+			prep.setInt(8, data.getMinimumFollowers());
+			prep.setInt(9, data.getId());
 			if (data.isCurrent()) {
 				try (PreparedStatementHandle prep2 = (PreparedStatementHandle) conn.prepareStatement("UPDATE events SET "
 						+ "is_current = 0 WHERE is_current = 1")) {
@@ -400,7 +406,7 @@ public class EventsDao extends DAO<EventBean> {
 	
 	public List<AccountEventBean> getEventsForAccountAndStatus(int accountId, UserStatus status) throws SQLException {
 		try (Connection conn = mDataSource.getConnection();
-				PreparedStatementHandle prep = (PreparedStatementHandle) conn.prepareStatement("SELECT s.status, e.name, e.description, e.status, e.reserved_to_affiliates, e.reserved_to_partners, e.is_current "
+				PreparedStatementHandle prep = (PreparedStatementHandle) conn.prepareStatement("SELECT s.status, e.name, e.description, e.status, e.reserved_to_affiliates, e.reserved_to_partners, e.is_current, e.minimum_views, e.minimum_followers "
 						+ "FROM events e LEFT JOIN account_event_status s ON s.event_id = e.id WHERE s.account_id = ? AND s.status = ?")) {
 			prep.setInt(1, accountId);
 			prep.setString(2, status.name());
@@ -416,6 +422,8 @@ public class EventsDao extends DAO<EventBean> {
 					event.setReservedToAffiliates(rs.getBoolean("e.reserved_to_affiliates"));
 					event.setReservedToPartners(rs.getBoolean("e.reserved_to_partners"));
 					event.setStatus(EventBean.Status.valueOf(rs.getString("e.status")));
+					event.setMinimumViews(rs.getInt("e.minimum_views"));
+					event.setMinimumFollowers(rs.getInt("e.minimum_followers"));
 					bean.setEvent(event);
 					bean.setStatus(UserStatus.valueOf(rs.getString("s.status")));
 					ret.add(bean);
