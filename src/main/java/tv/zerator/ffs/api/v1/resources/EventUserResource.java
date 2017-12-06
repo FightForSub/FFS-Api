@@ -1,7 +1,14 @@
 package tv.zerator.ffs.api.v1.resources;
 
+import java.io.File;
+import java.io.IOException;
 import java.sql.SQLException;
+import java.util.logging.Level;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
+
+import org.apache.commons.io.FileUtils;
 import org.restlet.data.Status;
 import org.restlet.resource.Delete;
 import org.restlet.resource.Get;
@@ -15,10 +22,17 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import alexmog.apilib.exceptions.BadEntityException;
 import alexmog.apilib.exceptions.NotFoundException;
 import alexmog.apilib.managers.DaoManager.DaoInject;
+import alexmog.apilib.managers.ServicesManager.Service;
+import alexmog.apilib.services.EmailsService;
 import lombok.Data;
+import tv.zerator.ffs.api.Main;
+import tv.zerator.ffs.api.dao.AccountsDao;
 import tv.zerator.ffs.api.dao.EventsDao;
 import tv.zerator.ffs.api.dao.EventsDao.AccountStatusBean;
+import tv.zerator.ffs.api.dao.EventsDao.UserStatus;
+import tv.zerator.ffs.api.dao.EventsDao.UserStatusBean;
 import tv.zerator.ffs.api.dao.beans.AccountBean;
+import tv.zerator.ffs.api.dao.beans.EventBean;
 import tv.zerator.ffs.api.dao.beans.AccountBean.BroadcasterType;
 import tv.zerator.ffs.api.utils.ValidationUtils;
 import tv.zerator.ffs.api.v1.ApiV1;
@@ -26,8 +40,22 @@ import tv.zerator.ffs.api.v1.ApiV1;
 public class EventUserResource extends ServerResource {
 	@DaoInject
 	private static EventsDao mEvents;
-
+	@DaoInject
+	private static AccountsDao mAccountsDao;
+	@Service
+	private static EmailsService mEmailsService;
+	private static String mValidateEmail, mValidatedEmail;
 	private int mEventId, mUserId;
+	
+	static {
+		try {
+			mValidateEmail = FileUtils.readFileToString(new File("./email_templates/validation_event_pariticipation/index.html"));
+			mValidatedEmail = FileUtils.readFileToString(new File("./email_templates/validated_participant/index.html"));
+		} catch (IOException e) {
+			Main.LOGGER.log(Level.SEVERE, "Cannot init.", e);
+			System.exit(1);
+		}
+	}
 	
 	@Override
 	protected void doInit() throws ResourceException {
@@ -57,6 +85,26 @@ public class EventUserResource extends ServerResource {
 		if (bean == null) throw new NotFoundException("USER_NOT_REGISTERED");
 		
 		mEvents.updateUser(mEventId, mUserId, entity.status);
+		try {
+			if (entity.status == UserStatus.AWAITING_FOR_EMAIL_VALIDATION) {
+				EventBean event = mEvents.getEvent(mEventId);
+				UserStatusBean user = mEvents.getUser(mEventId, mUserId);
+				MimeMessage message = mEmailsService.generateMime("Validez votre compte!",
+						mValidateEmail.replaceAll("\\{EVENT_NAME\\}", event.getName())
+						.replaceAll("\\{EVENT_ID\\}", event.getId() + "")
+						.replaceAll("\\{CODE\\}", user.getEmailActivationKey()), "text/html", user.getAccount().getEmail());
+				mEmailsService.sendEmail(message);
+			} else if (entity.status == UserStatus.VALIDATED) {
+				EventBean event = mEvents.getEvent(mEventId);
+				UserStatusBean user = mEvents.getUser(mEventId, mUserId);
+				MimeMessage message = mEmailsService.generateMime("Validez votre compte!",
+						mValidatedEmail.replaceAll("\\{EVENT_NAME\\}", event.getName())
+						.replaceAll("\\{EVENT_ID\\}", event.getId() + ""), "text/html", user.getAccount().getEmail());
+				mEmailsService.sendEmail(message);
+			}
+		} catch (MessagingException e) {
+			Main.LOGGER.log(Level.SEVERE, "Cannot send email.", e);
+		}
 		return Status.SUCCESS_OK;
 	}
 	

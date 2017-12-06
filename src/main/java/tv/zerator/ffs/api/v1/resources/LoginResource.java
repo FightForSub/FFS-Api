@@ -10,9 +10,6 @@ import java.sql.SQLException;
 import java.util.UUID;
 import java.util.logging.Level;
 
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.ClientProtocolException;
@@ -163,13 +160,13 @@ public class LoginResource extends ServerResource {
 			else mAccounts.update(acc);
 			
 			if (ret.new_account) {
-				try {
+/*				try {
 					MimeMessage message = mEmailsService.generateMime("Validez votre compte!",
 							mValidationCodeEmailContent.replaceAll("\\{CODE\\}", acc.getEmailActivationKey()), "text/html", acc.getEmail());
 					mEmailsService.sendEmail(message);
 				} catch (MessagingException e) {
 					Main.LOGGER.log(Level.SEVERE, "Cannot send email.", e);
-				}
+				}*/
 			}
 			
 			TokenBean tokenBean = new TokenBean();
