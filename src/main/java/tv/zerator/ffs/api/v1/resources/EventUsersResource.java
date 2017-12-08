@@ -40,6 +40,7 @@ import lombok.Data;
 import tv.zerator.ffs.api.Main;
 import tv.zerator.ffs.api.dao.AccountsDao;
 import tv.zerator.ffs.api.dao.EventsDao;
+import tv.zerator.ffs.api.dao.EventsDao.AccountStatusBean;
 import tv.zerator.ffs.api.dao.beans.AccountBean;
 import tv.zerator.ffs.api.dao.beans.AccountBean.BroadcasterType;
 import tv.zerator.ffs.api.utils.ValidationUtils;
@@ -92,11 +93,11 @@ public class EventUsersResource extends ServerResource {
 		Object obj = getRequest().getAttributes().get("account");
 		boolean isModerator = obj == null ? false : ((AccountBean) obj).getGrade() >= ApiV1.MODERATOR;
 		
-		List<AccountBean> users = statusStr != null ? mEvents.getUsers(mEventId, status) : mEvents.getUsers(mEventId);
+		List<AccountStatusBean> users = statusStr != null ? mEvents.getUsers(mEventId, status) : mEvents.getUsers(mEventId);
 		List<UserRepresentation> ret = new ArrayList<>();
 		
-		for (AccountBean ac : users) ret.add(isModerator ? new UserRepresentation(ac.getTwitchId(), ac.getViews(), ac.getFollowers(), ac.getGrade(), ac.getUsername(), ac.getEmail(), ac.getUrl(), ac.getLogo(), ac.getBroadcasterType())
-				: new UserRepresentation(ac.getTwitchId(), ac.getViews(), ac.getFollowers(), ac.getGrade(), ac.getUsername(), null, ac.getUrl(), ac.getLogo(), null));
+		for (AccountStatusBean ac : users) ret.add(isModerator ? new UserRepresentation(ac.getTwitchId(), ac.getViews(), ac.getFollowers(), ac.getGrade(), ac.getUsername(), ac.getEmail(), ac.getUrl(), ac.getLogo(), ac.getBroadcasterType(), ac.getStatus())
+				: new UserRepresentation(ac.getTwitchId(), ac.getViews(), ac.getFollowers(), ac.getGrade(), ac.getUsername(), null, ac.getUrl(), ac.getLogo(), null, ac.getStatus()));
 		
 		return ret;
 	}
@@ -163,6 +164,7 @@ public class EventUsersResource extends ServerResource {
 		private final int twitchId, views, followers, grade;
 		private final String username, email, url, logo;
 		private final BroadcasterType broadcasterType;
+		private final EventsDao.UserStatus status;
 	}
 	
 	private static class RegisterUserEntity {
