@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>tv.zerator.ffs</groupId>
   <artifactId>api</artifactId>
-  <version>0.8.91-SNAPSHOT</version>
+  <version>0.8.91</version>
   <properties>
 		<api-lib-version>0.5.2-SNAPSHOT</api-lib-version>
 	</properties>
