@@ -1,5 +1,6 @@
 package tv.zerator.ffs.api.v1.resources;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -8,6 +9,10 @@ import java.sql.SQLException;
 import java.util.UUID;
 import java.util.logging.Level;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
+
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -33,6 +38,8 @@ import alexmog.apilib.exceptions.ConflictException;
 import alexmog.apilib.exceptions.InternalServerError;
 import alexmog.apilib.exceptions.NotFoundException;
 import alexmog.apilib.managers.DaoManager.DaoInject;
+import alexmog.apilib.managers.ServicesManager.Service;
+import alexmog.apilib.services.EmailsService;
 import tv.zerator.ffs.api.Main;
 import tv.zerator.ffs.api.dao.AccountsDao;
 import tv.zerator.ffs.api.dao.EventsDao;
@@ -47,9 +54,12 @@ public class EventRegisterResource extends ServerResource {
 	private static AccountsDao mAccounts;
 	@DaoInject
 	private static EventsDao mEvents;
+	@Service
+	private static EmailsService mEmailsService;
 	private static final ObjectMapper mMapper;
 	private final CloseableHttpClient mHttpClient = HttpClients.createDefault();
 	private static String mTwitchUserUrl, mTwitchClientId, mTwitchChannelUrl = null, mTwitchAccept;
+	private static String mValidatedEmail;
 
 	private int mEventId;
 	
@@ -58,6 +68,12 @@ public class EventRegisterResource extends ServerResource {
 		        .setSerializationInclusion(JsonSerialize.Inclusion.NON_NULL).setVisibility(JsonMethod.FIELD, Visibility.ANY);
 	    mMapper.registerModule(new MrBeanModule());
 	    mMapper.disableDefaultTyping();
+	    try {
+			mValidatedEmail = FileUtils.readFileToString(new File("./email_templates/validated_participant/index.html"));
+		} catch (IOException e) {
+			Main.LOGGER.log(Level.SEVERE, "Cannot init.", e);
+			System.exit(1);
+		}
 	}
 	
 	public EventRegisterResource() {
@@ -143,7 +159,15 @@ public class EventRegisterResource extends ServerResource {
 		if (status != UserStatus.AWAITING_FOR_EMAIL_VALIDATION) throw new ConflictException("BAD_STATUS");
 		
 		mEvents.updateUser(mEventId, acc.getTwitchId(), UserStatus.VALIDATED);
-		
+		try {
+			EventBean event = mEvents.getEvent(mEventId);
+			MimeMessage message = mEmailsService.generateMime("Validez votre compte!",
+					mValidatedEmail.replaceAll("\\{EVENT_NAME\\}", event.getName())
+					.replaceAll("\\{EVENT_ID\\}", event.getId() + ""), "text/html", acc.getEmail());
+			mEmailsService.sendEmail(message);
+		} catch (MessagingException e) {
+			Main.LOGGER.log(Level.SEVERE, "Cannot send email.", e);
+		}
 		return Status.SUCCESS_OK;
 	}
 	

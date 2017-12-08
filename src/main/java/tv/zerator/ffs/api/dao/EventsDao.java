@@ -61,7 +61,7 @@ public class EventsDao extends DAO<EventBean> {
 	
 	public List<EventBean> getEvents(EventBean.Status status, int start, int end) throws SQLException {
 		try (Connection conn = mDataSource.getConnection();
-				PreparedStatementHandle prep = (PreparedStatementHandle) conn.prepareStatement("SELECT * FROM events WHERE status = ? LIMIT ?, ?")) {
+				PreparedStatementHandle prep = (PreparedStatementHandle) conn.prepareStatement("SELECT * FROM events WHERE status = ? ORDER BY id DESC LIMIT ?, ?")) {
 			prep.setString(1, status.name());
 			prep.setInt(2, start);
 			prep.setInt(3, end);
@@ -75,7 +75,7 @@ public class EventsDao extends DAO<EventBean> {
 	
 	public List<EventBean> getEvents(int start, int end) throws SQLException {
 		try (Connection conn = mDataSource.getConnection();
-				PreparedStatementHandle prep = (PreparedStatementHandle) conn.prepareStatement("SELECT * FROM events LIMIT ?, ?")) {
+				PreparedStatementHandle prep = (PreparedStatementHandle) conn.prepareStatement("SELECT * FROM events ORDER BY id DESC LIMIT ?, ?")) {
 			prep.setInt(1, start);
 			prep.setInt(2, end);
 			try (ResultSet rs = prep.executeQuery()) {
@@ -307,6 +307,42 @@ public class EventsDao extends DAO<EventBean> {
 			prep.setString(3, status.name());
 			prep.setString(4, emailActivationKey);
 			prep.executeUpdate();
+		}
+	}
+	
+	public static @Data class UserStatusBean {
+		private AccountBean account;
+		private int eventId;
+		private UserStatus status;
+		private String emailActivationKey;
+	}
+	
+	public UserStatusBean getUser(int eventId, int accountId) throws SQLException {
+		try (Connection conn = mDataSource.getConnection();
+				PreparedStatementHandle prep = (PreparedStatementHandle) conn.prepareStatement("SELECT s.event_id, s.status, s.email_activation_key, a.twitch_id, a.username, a.email, a.views, a.followers, a.broadcaster_type, a.url, a.grade, a.logo "
+						+ " FROM accounts a LEFT JOIN account_event_status s ON s.account_id = a.twitch_id "
+						+ "WHERE s.account_id = ? AND s.event_id = ?")) {
+			prep.setInt(1, eventId);
+			prep.setInt(2, accountId);
+			try (ResultSet rs = prep.executeQuery()) {
+				if (!rs.next()) return null;
+				UserStatusBean bean = new UserStatusBean();
+				AccountBean account = new AccountBean();
+				account.setTwitchId(rs.getInt("a.twitch_id"));
+				account.setUsername(rs.getString("a.username"));
+				account.setEmail(rs.getString("a.email"));
+				account.setViews(rs.getInt("a.views"));
+				account.setFollowers(rs.getInt("a.followers"));
+				account.setBroadcasterType(BroadcasterType.valueOf(rs.getString("a.broadcaster_type")));
+				account.setUrl(rs.getString("a.url"));
+				account.setGrade(rs.getInt("a.grade"));
+				account.setLogo(rs.getString("a.logo"));
+				bean.setAccount(account);
+				bean.setEventId(rs.getInt("s.event_id"));
+				bean.setStatus(UserStatus.valueOf(rs.getString("s.status")));
+				bean.setEmailActivationKey(rs.getString("s.email_activation_key"));
+				return bean;
+			}
 		}
 	}
 	
