@@ -89,7 +89,7 @@ public class EventUserResource extends ServerResource {
 			if (entity.status == UserStatus.AWAITING_FOR_EMAIL_VALIDATION) {
 				EventBean event = mEvents.getEvent(mEventId);
 				UserStatusBean user = mEvents.getUser(mEventId, mUserId);
-				MimeMessage message = mEmailsService.generateMime("Validez votre compte!",
+				MimeMessage message = mEmailsService.generateMime("FFS - Validation de votre participation a l'event " + event.getName(),
 						mValidateEmail.replaceAll("\\{EVENT_NAME\\}", event.getName())
 						.replaceAll("\\{EVENT_ID\\}", event.getId() + "")
 						.replaceAll("\\{CODE\\}", user.getEmailActivationKey()), "text/html", user.getAccount().getEmail());
@@ -97,7 +97,7 @@ public class EventUserResource extends ServerResource {
 			} else if (entity.status == UserStatus.VALIDATED) {
 				EventBean event = mEvents.getEvent(mEventId);
 				UserStatusBean user = mEvents.getUser(mEventId, mUserId);
-				MimeMessage message = mEmailsService.generateMime("Validez votre compte!",
+				MimeMessage message = mEmailsService.generateMime("FFS - Votre participation a l'event " + event.getName() + " a ete validee",
 						mValidatedEmail.replaceAll("\\{EVENT_NAME\\}", event.getName())
 						.replaceAll("\\{EVENT_ID\\}", event.getId() + ""), "text/html", user.getAccount().getEmail());
 				mEmailsService.sendEmail(message);

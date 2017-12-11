@@ -159,15 +159,15 @@ public class LoginResource extends ServerResource {
 			if (ret.new_account) mAccounts.insert(acc);
 			else mAccounts.update(acc);
 			
-			if (ret.new_account) {
-/*				try {
+/*			if (ret.new_account) {
+				try {
 					MimeMessage message = mEmailsService.generateMime("Validez votre compte!",
 							mValidationCodeEmailContent.replaceAll("\\{CODE\\}", acc.getEmailActivationKey()), "text/html", acc.getEmail());
 					mEmailsService.sendEmail(message);
 				} catch (MessagingException e) {
 					Main.LOGGER.log(Level.SEVERE, "Cannot send email.", e);
-				}*/
-			}
+				}
+			}*/
 			
 			TokenBean tokenBean = new TokenBean();
 			tokenBean.setAccountId(acc.getTwitchId());
