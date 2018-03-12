@@ -180,23 +180,23 @@ public class EventsDao extends DAO<EventBean> {
 		}
 	}
 	
-	public void addScore(int roundId, int accountId, int score) throws SQLException {
+	public void addScore(int roundId, int accountId, double score) throws SQLException {
 		try (Connection conn = mDataSource.getConnection();
 				PreparedStatementHandle prep = (PreparedStatementHandle) conn.prepareStatement("INSERT INTO round_scores "
 						+ "(round_id, account_id, score) VALUES "
 						+ "(?, ?, ?)")) {
 			prep.setInt(1, roundId);
 			prep.setInt(2, accountId);
-			prep.setInt(3, score);
+			prep.setDouble(3, score);
 			prep.executeUpdate();
 		}
 	}
 	
-	public void updateScore(int roundId, int accountId, int score) throws SQLException {
+	public void updateScore(int roundId, int accountId, double score) throws SQLException {
 		try (Connection conn = mDataSource.getConnection();
 				PreparedStatementHandle prep = (PreparedStatementHandle) conn.prepareStatement("UPDATE round_scores SET "
 						+ "score = ? WHERE round_id = ? AND account_id = ?")) {
-			prep.setInt(1, score);
+			prep.setDouble(1, score);
 			prep.setInt(2, roundId);
 			prep.setInt(3, accountId);
 			prep.executeUpdate();
@@ -205,7 +205,8 @@ public class EventsDao extends DAO<EventBean> {
 	
 	public @Data static class RoundUserScoreBean {
 		private final String username, url, logo;
-		private final int id, score;
+		private final int id;
+		private final double score;
 	}
 	
 	public List<RoundUserScoreBean> getScores(int roundId) throws SQLException {
@@ -214,19 +215,19 @@ public class EventsDao extends DAO<EventBean> {
 			prep.setInt(1, roundId);
 			try (ResultSet rs = prep.executeQuery()) {
 				List<RoundUserScoreBean> ret = new ArrayList<>();
-				while (rs.next()) ret.add(new RoundUserScoreBean(rs.getString("a.username"), rs.getString("a.url"), rs.getString("a.logo"), rs.getInt("a.twitch_id"), rs.getInt("s.score")));
+				while (rs.next()) ret.add(new RoundUserScoreBean(rs.getString("a.username"), rs.getString("a.url"), rs.getString("a.logo"), rs.getInt("a.twitch_id"), rs.getDouble("s.score")));
 				return ret;
 			}
 		}
 	}
 	
-	public Integer getScore(int roundId, int accountId) throws SQLException {
+	public Double getScore(int roundId, int accountId) throws SQLException {
 		try (Connection conn = mDataSource.getConnection();
 				PreparedStatementHandle prep = (PreparedStatementHandle) conn.prepareStatement("SELECT score FROM round_scores WHERE round_id = ? AND account_id = ?")) {
 			prep.setInt(1, roundId);
 			prep.setInt(2, accountId);
 			try (ResultSet rs = prep.executeQuery()) {
-				if (rs.next()) return rs.getInt("score");
+				if (rs.next()) return rs.getDouble("score");
 				return null;
 			}
 		}
