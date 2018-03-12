@@ -55,10 +55,11 @@ public class EventRoundUserScoreResource extends ServerResource {
 	}
 	
 	private @Data static class UpdateScoreMessage {
-		public final int event_id, round_id, user_id, score;
+		public final int event_id, round_id, user_id;
+		public final double score;
 	}
 	
 	private static class UpdateScoreEntity {
-		public int score;
+		public double score;
 	}
 }
