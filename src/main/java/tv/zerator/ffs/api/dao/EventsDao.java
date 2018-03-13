@@ -369,6 +369,16 @@ public class EventsDao extends DAO<EventBean> {
 			prep.executeUpdate();
 		}
 	}
+
+	public void updateUserRank(int eventId, int accountId, int rank) throws SQLException {
+		try (Connection conn = mDataSource.getConnection();
+			 PreparedStatementHandle prep = (PreparedStatementHandle) conn.prepareStatement("UPDATE account_event_status SET rank = ? WHERE account_id = ? AND event_id = ?")) {
+			prep.setInt(1, rank);
+			prep.setInt(2, accountId);
+			prep.setInt(3, eventId);
+			prep.executeUpdate();
+		}
+	}
 	
 	public @Data class AccountStatusBean extends AccountBean {
 		public UserStatus status;
