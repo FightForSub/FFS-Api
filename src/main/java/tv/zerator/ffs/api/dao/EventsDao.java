@@ -235,7 +235,7 @@ public class EventsDao extends DAO<EventBean> {
 	
 	public List<AccountStatusBean> getUsers(int eventId, UserStatus status) throws SQLException {
 		try (Connection conn = mDataSource.getConnection();
-				PreparedStatementHandle prep = (PreparedStatementHandle) conn.prepareStatement("SELECT a.twitch_id, a.username, a.email, a.views, a.followers, a.broadcaster_type, a.url, a.grade, a.logo, s.status "
+				PreparedStatementHandle prep = (PreparedStatementHandle) conn.prepareStatement("SELECT a.twitch_id, a.username, a.email, a.views, a.followers, a.broadcaster_type, a.url, a.grade, a.logo, s.status, s.rank "
 						+ " FROM accounts a LEFT JOIN account_event_status s ON s.account_id = a.twitch_id WHERE s.event_id = ? AND s.status = ?")) {
 			prep.setInt(1, eventId);
 			prep.setString(2, status.name());
@@ -253,6 +253,7 @@ public class EventsDao extends DAO<EventBean> {
 					bean.setGrade(rs.getInt("a.grade"));
 					bean.setLogo(rs.getString("a.logo"));
 					bean.setStatus(UserStatus.valueOf(rs.getString("s.status")));
+					bean.setRank(rs.getInt("s.rank"));
 					ret.add(bean);
 				}
 				return ret;
@@ -262,7 +263,7 @@ public class EventsDao extends DAO<EventBean> {
 	
 	public List<AccountStatusBean> getUsers(int eventId) throws SQLException {
 		try (Connection conn = mDataSource.getConnection();
-				PreparedStatementHandle prep = (PreparedStatementHandle) conn.prepareStatement("SELECT a.twitch_id, a.username, a.email, a.views, a.followers, a.broadcaster_type, a.url, a.grade, a.logo, s.status "
+				PreparedStatementHandle prep = (PreparedStatementHandle) conn.prepareStatement("SELECT a.twitch_id, a.username, a.email, a.views, a.followers, a.broadcaster_type, a.url, a.grade, a.logo, s.status, s.rank "
 						+ " FROM accounts a LEFT JOIN account_event_status s ON s.account_id = a.twitch_id WHERE s.event_id = ?")) {
 			prep.setInt(1, eventId);
 			try (ResultSet rs = prep.executeQuery()) {
@@ -279,6 +280,7 @@ public class EventsDao extends DAO<EventBean> {
 					bean.setGrade(rs.getInt("a.grade"));
 					bean.setLogo(rs.getString("a.logo"));
 					bean.setStatus(UserStatus.valueOf(rs.getString("s.status")));
+					bean.setRank(rs.getInt("s.rank"));
 					ret.add(bean);
 				}
 				return ret;
@@ -370,11 +372,12 @@ public class EventsDao extends DAO<EventBean> {
 	
 	public @Data class AccountStatusBean extends AccountBean {
 		public UserStatus status;
+		public Integer rank;
 	}
 	
 	public AccountStatusBean getRegistered(int eventId, int accountId) throws SQLException {
 		try (Connection conn = mDataSource.getConnection();
-				PreparedStatementHandle prep = (PreparedStatementHandle) conn.prepareStatement("SELECT a.twitch_id, a.username, a.email, a.views, a.followers, a.broadcaster_type, a.url, a.grade, s.status, a.logo "
+				PreparedStatementHandle prep = (PreparedStatementHandle) conn.prepareStatement("SELECT a.twitch_id, a.username, a.email, a.views, a.followers, a.broadcaster_type, a.url, a.grade, s.status, a.logo, s.rank "
 						+ " FROM accounts a LEFT JOIN account_event_status s ON s.account_id = a.twitch_id WHERE s.event_id = ? AND a.twitch_id = ?")) {
 			prep.setInt(1, eventId);
 			prep.setInt(2, accountId);
@@ -391,6 +394,7 @@ public class EventsDao extends DAO<EventBean> {
 					bean.setGrade(rs.getInt("a.grade"));
 					bean.setLogo(rs.getString("a.logo"));
 					bean.status = UserStatus.valueOf(rs.getString("s.status"));
+					bean.rank = rs.getInt("s.rank");
 					return bean;
 				}
 				return null;
