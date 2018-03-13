@@ -161,7 +161,8 @@ public class EventUsersResource extends ServerResource {
 	
 	@JsonInclude(Include.NON_NULL)
 	private @Data static class UserRepresentation {
-		private final int twitchId, views, followers, grade, rank;
+		private final int twitchId, views, followers, grade;
+		private final Integer rank;
 		private final String username, email, url, logo;
 		private final BroadcasterType broadcasterType;
 		private final EventsDao.UserStatus status;
