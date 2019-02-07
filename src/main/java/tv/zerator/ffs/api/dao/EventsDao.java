@@ -325,8 +325,8 @@ public class EventsDao extends DAO<EventBean> {
 				PreparedStatementHandle prep = (PreparedStatementHandle) conn.prepareStatement("SELECT s.event_id, s.status, s.email_activation_key, a.twitch_id, a.username, a.email, a.views, a.followers, a.broadcaster_type, a.url, a.grade, a.logo "
 						+ " FROM accounts a LEFT JOIN account_event_status s ON s.account_id = a.twitch_id "
 						+ "WHERE s.account_id = ? AND s.event_id = ?")) {
-			prep.setInt(1, eventId);
-			prep.setInt(2, accountId);
+			prep.setInt(1, accountId);
+			prep.setInt(2, eventId);
 			try (ResultSet rs = prep.executeQuery()) {
 				if (!rs.next()) return null;
 				UserStatusBean bean = new UserStatusBean();
