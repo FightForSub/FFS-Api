@@ -16,6 +16,7 @@ import tv.zerator.ffs.api.v1.resources.EventResource;
 import tv.zerator.ffs.api.v1.resources.EventRoundResource;
 import tv.zerator.ffs.api.v1.resources.EventRoundUserScoreResource;
 import tv.zerator.ffs.api.v1.resources.EventRoundsResource;
+import tv.zerator.ffs.api.v1.resources.EventUserRankResource;
 import tv.zerator.ffs.api.v1.resources.EventUserResource;
 import tv.zerator.ffs.api.v1.resources.EventUsersResource;
 import tv.zerator.ffs.api.v1.resources.EventsResource;
@@ -68,6 +69,7 @@ public class ApiV1 extends ApiBase {
 			break;
 		case MODERATOR:
 			router.attach("/event/{EVENT_ID}/round/{ROUND_ID}/score/{USER_ID}", EventRoundUserScoreResource.class);
+			router.attach("/event/{EVENT_ID}/user/{USER_ID}/rank", EventUserRankResource.class);
 			break;
 		case ADMIN:
 			break;

@@ -96,8 +96,8 @@ public class EventUsersResource extends ServerResource {
 		List<AccountStatusBean> users = statusStr != null ? mEvents.getUsers(mEventId, status) : mEvents.getUsers(mEventId);
 		List<UserRepresentation> ret = new ArrayList<>();
 		
-		for (AccountStatusBean ac : users) ret.add(isModerator ? new UserRepresentation(ac.getTwitchId(), ac.getViews(), ac.getFollowers(), ac.getGrade(), ac.getUsername(), ac.getEmail(), ac.getUrl(), ac.getLogo(), ac.getBroadcasterType(), ac.getStatus())
-				: new UserRepresentation(ac.getTwitchId(), ac.getViews(), ac.getFollowers(), ac.getGrade(), ac.getUsername(), null, ac.getUrl(), ac.getLogo(), null, ac.getStatus()));
+		for (AccountStatusBean ac : users) ret.add(isModerator ? new UserRepresentation(ac.getTwitchId(), ac.getViews(), ac.getFollowers(), ac.getGrade(), ac.getRank(), ac.getUsername(), ac.getEmail(), ac.getUrl(), ac.getLogo(), ac.getBroadcasterType(), ac.getStatus())
+				: new UserRepresentation(ac.getTwitchId(), ac.getViews(), ac.getFollowers(), ac.getGrade(), ac.getRank(), ac.getUsername(), null, ac.getUrl(), ac.getLogo(), null, ac.getStatus()));
 		
 		return ret;
 	}
@@ -162,6 +162,7 @@ public class EventUsersResource extends ServerResource {
 	@JsonInclude(Include.NON_NULL)
 	private @Data static class UserRepresentation {
 		private final int twitchId, views, followers, grade;
+		private final Integer rank;
 		private final String username, email, url, logo;
 		private final BroadcasterType broadcasterType;
 		private final EventsDao.UserStatus status;
