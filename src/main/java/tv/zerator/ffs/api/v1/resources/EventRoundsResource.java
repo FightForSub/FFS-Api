@@ -31,31 +31,28 @@ public class EventRoundsResource extends ServerResource {
 	}
 	
 	@Get
-	public Rounds getRounds() throws SQLException {
+	public Map<Integer, List<RoundUserScoreBean>> getRounds() throws SQLException {
 		if (mEvents.getEvent(mEventId) == null) throw new NotFoundException("EVENT_NOT_FOUND");
 		
-		Rounds rounds = new Rounds();
-		Map<Integer, List<RoundUserScoreBean>> roundsMap = new HashMap<>();
-		rounds.rounds = roundsMap;
+		Map<Integer, List<RoundUserScoreBean>> rounds = new HashMap<>();
 		
 		List<Integer> roundIds = mEvents.getRounds(mEventId);
 
 		if (roundIds.isEmpty()) return rounds;
 		
-		for (int r : roundIds) rounds.rounds.put(r, new ArrayList<RoundUserScoreBean>());
+		for (int r : roundIds) rounds.put(r, new ArrayList<RoundUserScoreBean>());
 		
 		List<RoundUserScoreBean> scores = mEvents.getAllScores(mEventId);
 		
 		for (RoundUserScoreBean bean : scores) {
-			List<RoundUserScoreBean> list = roundsMap.get(bean.getRound());
+			List<RoundUserScoreBean> list = rounds.get(bean.getRound());
 			if (list == null) {
 				list = new ArrayList<>();
-				roundsMap.put(bean.getRound(), list);
+				rounds.put(bean.getRound(), list);
 			}
 			list.add(bean);
 		}
 		
-		rounds.rounds = roundsMap;
 		return rounds;
 	}
 	
@@ -64,9 +61,5 @@ public class EventRoundsResource extends ServerResource {
 		ValidationUtils.verifyGroup(getRequest(), ApiV1.MODERATOR);
 		if (mEvents.getEvent(mEventId) == null) throw new NotFoundException("EVENT_NOT_FOUND");
 		return new CreatedBean(mEvents.addRound(mEventId));
-	}
-	
-	public static class Rounds {
-		public Map<Integer, List<RoundUserScoreBean>> rounds;
 	}
 }
