@@ -210,6 +210,7 @@ public class EventsDao extends DAO<EventBean> {
 		private final String username, url, logo;
 		private final int id;
 		private final double score;
+		public final int round;
 	}
 	
 	public List<RoundUserScoreBean> getScores(int roundId) throws SQLException {
@@ -218,7 +219,18 @@ public class EventsDao extends DAO<EventBean> {
 			prep.setInt(1, roundId);
 			try (ResultSet rs = prep.executeQuery()) {
 				List<RoundUserScoreBean> ret = new ArrayList<>();
-				while (rs.next()) ret.add(new RoundUserScoreBean(rs.getString("a.username"), rs.getString("a.url"), rs.getString("a.logo"), rs.getInt("a.twitch_id"), rs.getDouble("s.score")));
+				while (rs.next()) ret.add(new RoundUserScoreBean(rs.getString("a.username"), rs.getString("a.url"), rs.getString("a.logo"), rs.getInt("a.twitch_id"), rs.getDouble("s.score"), roundId));
+				return ret;
+			}
+		}
+	}
+	
+	public List<RoundUserScoreBean> getAllScores() throws SQLException {
+		try (Connection conn = mDataSource.getConnection();
+				PreparedStatementHandle prep = (PreparedStatementHandle) conn.prepareStatement("SELECT s.score, s.round_id, a.username, a.url, a.twitch_id, a.logo FROM accounts a LEFT JOIN round_scores s ON s.account_id = a.twitch_id")) {
+			try (ResultSet rs = prep.executeQuery()) {
+				List<RoundUserScoreBean> ret = new ArrayList<>();
+				while (rs.next()) ret.add(new RoundUserScoreBean(rs.getString("a.username"), rs.getString("a.url"), rs.getString("a.logo"), rs.getInt("a.twitch_id"), rs.getDouble("s.score"), rs.getInt("s.round_id")));
 				return ret;
 			}
 		}
