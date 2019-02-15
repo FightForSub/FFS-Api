@@ -31,26 +31,32 @@ public class EventRoundsResource extends ServerResource {
 	}
 	
 	@Get
-	public List<Round> getRounds() throws SQLException {
+	public Rounds getRounds() throws SQLException {
 		if (mEvents.getEvent(mEventId) == null) throw new NotFoundException("EVENT_NOT_FOUND");
 		
-		List<RoundUserScoreBean> scores = mEvents.getAllScores();
+		Rounds rounds = new Rounds();
+		Map<Integer, List<RoundUserScoreBean>> roundsMap = new HashMap<>();
+		rounds.rounds = roundsMap;
 		
-		List<Round> ret = new ArrayList<>();
+		List<Integer> roundIds = mEvents.getRounds(mEventId);
+
+		if (roundIds.isEmpty()) return rounds;
 		
-		Map<Integer, Round> roundsCache = new HashMap<>();
+		for (int r : roundIds) rounds.rounds.put(r, new ArrayList<RoundUserScoreBean>());
+		
+		List<RoundUserScoreBean> scores = mEvents.getAllScores(mEventId);
+		
 		for (RoundUserScoreBean bean : scores) {
-			Round round = roundsCache.get(bean.getRound());
-			if (round == null) {
-				round = new Round();
-				round.round = bean.getRound();
-				roundsCache.put(round.round, round);
-				ret.add(round);
+			List<RoundUserScoreBean> list = roundsMap.get(bean.getRound());
+			if (list == null) {
+				list = new ArrayList<>();
+				roundsMap.put(bean.getRound(), list);
 			}
-			round.scores.add(bean);
+			list.add(bean);
 		}
 		
-		return ret;
+		rounds.rounds = roundsMap;
+		return rounds;
 	}
 	
 	@Post
@@ -60,8 +66,7 @@ public class EventRoundsResource extends ServerResource {
 		return new CreatedBean(mEvents.addRound(mEventId));
 	}
 	
-	public static class Round {
-		public int round;
-		public List<RoundUserScoreBean> scores = new ArrayList<>();
+	public static class Rounds {
+		public Map<Integer, List<RoundUserScoreBean>> rounds;
 	}
 }
