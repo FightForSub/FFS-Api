@@ -22,6 +22,31 @@
 	</dependencies>
 	
 	<build>
+		<plugins>
+		    <plugin>
+			<groupId>org.codehaus.mojo</groupId>
+			<artifactId>exec-maven-plugin</artifactId>
+			<version>1.6.0</version>
+			<executions>
+			    <execution>
+				<id>run</id>
+				<phase>none</phase>
+				<goals>
+				    <goal>exec</goal>
+				</goals>
+				<configuration>
+				    <executable>java</executable>
+				    <workingDirectory>${basedir}/config</workingDirectory>
+				    <arguments>
+					<argument>-classpath</argument>
+					<classpath/>
+					<argument>tv.zerator.ffs.api.Main</argument>
+				    </arguments>
+				</configuration>
+			    </execution>
+			</executions>
+		    </plugin>
+		</plugins>
 		<pluginManagement>
 			<plugins>
 				<plugin>
