@@ -1,10 +1,8 @@
 package tv.zerator.ffs.api.dao;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.jolbox.bonecp.BoneCPDataSource;
 import com.jolbox.bonecp.PreparedStatementHandle;
 
 import alexmog.apilib.dao.DAO;
@@ -12,16 +10,10 @@ import alexmog.apilib.managers.DaoManager.Dao;
 import tv.zerator.ffs.api.dao.beans.AccountBean;
 
 @Dao(database = "general")
-public class AccountsDao extends DAO<AccountBean> {
+public class AccountsDao extends DAO {
 
-	public AccountsDao(BoneCPDataSource dataSource) {
-		super(dataSource);
-	}
-
-	@Override
 	public int insert(AccountBean data) throws SQLException {
-		try (Connection conn = mDataSource.getConnection();
-				PreparedStatementHandle prep = (PreparedStatementHandle) conn.prepareStatement("INSERT INTO accounts "
+		try (PreparedStatementHandle prep = (PreparedStatementHandle) getConnection().prepareStatement("INSERT INTO accounts "
 						+ "(twitch_id, username, email, views, followers, broadcaster_type, url, grade, email_activation_key, logo) VALUES "
 						+ "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")) {
 			prep.setInt(1, data.getTwitchId());
@@ -39,10 +31,8 @@ public class AccountsDao extends DAO<AccountBean> {
 		}
 	}
 
-	@Override
 	public AccountBean update(AccountBean data) throws SQLException {
-		try (Connection conn = mDataSource.getConnection();
-				PreparedStatementHandle prep = (PreparedStatementHandle) conn.prepareStatement("UPDATE accounts SET "
+		try (PreparedStatementHandle prep = (PreparedStatementHandle) getConnection().prepareStatement("UPDATE accounts SET "
 						+ "username = ?, email = ?, views = ?, followers = ?, broadcaster_type = ?, url = ?, grade = ?, email_activation_key = ?, logo = ? "
 						+ "WHERE twitch_id = ?")) {
 			prep.setString(1, data.getUsername());
@@ -61,8 +51,7 @@ public class AccountsDao extends DAO<AccountBean> {
 	}
 	
 	public AccountBean getAccountFromToken(String token) throws SQLException {
-		try (Connection conn = mDataSource.getConnection();
-				PreparedStatementHandle prep = (PreparedStatementHandle) conn.prepareStatement("SELECT "
+		try (PreparedStatementHandle prep = (PreparedStatementHandle) getConnection().prepareStatement("SELECT "
 						+ "a.broadcaster_type, a.email, a.email_activation_key, a.followers, a.grade, a.twitch_id, a.url, a.username, a.views, a.logo "
 						+ "FROM accounts a LEFT JOIN auth_tokens t ON t.account_id = a.twitch_id WHERE t.token = ?")) {
 			prep.setString(1, token);
@@ -100,8 +89,7 @@ public class AccountsDao extends DAO<AccountBean> {
 	}
 
 	public AccountBean get(int twitchId) throws SQLException {
-		try (Connection conn = mDataSource.getConnection();
-				PreparedStatementHandle prep = (PreparedStatementHandle) conn.prepareStatement("SELECT * FROM accounts WHERE twitch_id = ?")) {
+		try (PreparedStatementHandle prep = (PreparedStatementHandle) getConnection().prepareStatement("SELECT * FROM accounts WHERE twitch_id = ?")) {
 			prep.setInt(1, twitchId);
 			try (ResultSet rs = prep.executeQuery()) {
 				if (!rs.next()) return null;
@@ -111,8 +99,7 @@ public class AccountsDao extends DAO<AccountBean> {
 	}
 
 	public AccountBean getFromValidationCode(String code) throws SQLException {
-		try (Connection conn = mDataSource.getConnection();
-				PreparedStatementHandle prep = (PreparedStatementHandle) conn.prepareStatement("SELECT * FROM accounts WHERE email_activation_key = ?")) {
+		try (PreparedStatementHandle prep = (PreparedStatementHandle) getConnection().prepareStatement("SELECT * FROM accounts WHERE email_activation_key = ?")) {
 			prep.setString(1, code);
 			try (ResultSet rs = prep.executeQuery()) {
 				if (!rs.next()) return null;
