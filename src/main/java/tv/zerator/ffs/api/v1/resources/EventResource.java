@@ -1,8 +1,17 @@
 package tv.zerator.ffs.api.v1.resources;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Collections;
+import java.util.Comparator;
 
+
+import lombok.RequiredArgsConstructor;
 import org.restlet.data.Status;
 import org.restlet.resource.Delete;
 import org.restlet.resource.Get;
@@ -22,38 +31,38 @@ import tv.zerator.ffs.api.v1.ApiV1;
 public class EventResource extends ServerResource {
 	@DaoInject
 	private static EventsDao mEvents;
-	
+
 	private int mEventId;
 
 	@Override
 	protected void doInit() throws ResourceException {
 		mEventId = Integer.parseInt(getAttribute("EVENT_ID"));
 	}
-	
+
 	@Get
 	public EventBean getEvent() throws SQLException {
 		EventBean event = mEvents.getEvent(mEventId);
 		if (event == null) throw new NotFoundException("EVENT_NOT_FOUND");
 		return event;
 	}
-	
+
 	@Put
 	public Status updateEvent(UpdateEventEntity entity) throws SQLException {
 		ValidationUtils.verifyGroup(getRequest(), ApiV1.ADMIN);
 		ValidationErrors err = new ValidationErrors();
-		
+
 		if (entity == null) throw new BadEntityException("ENTITY_NOT_FOUND");
-		
+
 		err.verifyFieldEmptyness("name", entity.name, 3, 200);
 		err.verifyFieldEmptyness("description", entity.description, 3, 2048);
-		
+
 		err.checkErrors("EVENT_UPDATE_ERROR");
-		
+
 		EventBean bean = mEvents.getEvent(mEventId);
 
-		if (entity.status == EventBean.Status.ENDED && bean.getStatus() != EventBean.Status.ENDED)
-			rankAllUsers(mEventId);
-
+		if (entity.status == EventBean.Status.ENDED && bean.getStatus() != EventBean.Status.ENDED){
+            rankAllUsers(mEventId);
+        }
 
 		if (bean == null) throw new NotFoundException("EVENT_NOT_FOUND");
 		bean.setCurrent(entity.current);
@@ -67,11 +76,9 @@ public class EventResource extends ServerResource {
 		bean.setRankingType(entity.ranking_type);
 		mEvents.update(bean);
 
-
-
 		return Status.SUCCESS_OK;
 	}
-	
+
 	@Delete
 	public Status deleteEvent() throws SQLException {
    		ValidationUtils.verifyGroup(getRequest(), ApiV1.ADMIN);
@@ -121,7 +128,7 @@ public class EventResource extends ServerResource {
 		for (Map.Entry<Integer,Double> entry:
 				list) {
 
-			if (currentScore == null || !currentScore.equals(entry.getValue())){
+			if (!currentScore.equals(entry.getValue())){
 				currentRank = i;
 				currentScore = entry.getValue();
 			}
@@ -138,12 +145,9 @@ public class EventResource extends ServerResource {
 
 	}
 
-	class ScoreUserValueComparator implements Comparator<Map.Entry<Integer, Double>> {
-		EventBean.RankingType rankingType;
-
-		ScoreUserValueComparator(EventBean.RankingType rankingType) {
-			this.rankingType = rankingType;
-		}
+	@RequiredArgsConstructor
+	private static class ScoreUserValueComparator implements Comparator<Map.Entry<Integer, Double>> {
+		private final EventBean.RankingType rankingType;
 
 		@Override
 		public int compare(Map.Entry<Integer, Double> e1, Map.Entry<Integer, Double> e2) {
