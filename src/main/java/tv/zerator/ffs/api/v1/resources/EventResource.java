@@ -128,7 +128,7 @@ public class EventResource extends ServerResource {
 		for (Map.Entry<Integer,Double> entry:
 				list) {
 
-			if (!currentScore.equals(entry.getValue())){
+			if (currentScore == null || !currentScore.equals(entry.getValue())){
 				currentRank = i;
 				currentScore = entry.getValue();
 			}
