@@ -4,6 +4,7 @@ webserver.maxThreads=512
 
 # Twitch config
 twitch.user_url=https://api.twitch.tv/kraken/user
+twitch.users_url=https://api.twitch.tv/kraken/users/
 twitch.client_id=cs5900eog2wajva8rnvf2jtx6gazsvd
 twitch.channels_url=https://api.twitch.tv/kraken/channels/
 twitch.accept_header=application/vnd.twitchtv.v5+json

@@ -23,6 +23,7 @@ import tv.zerator.ffs.api.v1.resources.EventsResource;
 import tv.zerator.ffs.api.v1.resources.LoginResource;
 import tv.zerator.ffs.api.v1.resources.MeEventsResource;
 import tv.zerator.ffs.api.v1.resources.MeResource;
+import tv.zerator.ffs.api.v1.resources.EventCheckSubscriptionResource;
 import tv.zerator.ffs.api.v1.verifiers.OAuthVerifier;
 
 public class ApiV1 extends ApiBase {
@@ -66,6 +67,7 @@ public class ApiV1 extends ApiBase {
 			break;
 		case USER:
 			router.attach("/event/{EVENT_ID}/register", EventRegisterResource.class);
+			router.attach("/event/{EVENT_ID}/check_subscription", EventCheckSubscriptionResource.class);
 			break;
 		case MODERATOR:
 			router.attach("/event/{EVENT_ID}/round/{ROUND_ID}/score/{USER_ID}", EventRoundUserScoreResource.class);

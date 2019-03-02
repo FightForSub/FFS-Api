@@ -249,6 +249,7 @@ public class EventsDao extends DAO {
 					bean.setLogo(rs.getString("a.logo"));
 					bean.setStatus(UserStatus.valueOf(rs.getString("s.status")));
 					bean.setRank(rs.getInt("s.rank"));
+					bean.setSubscribeToWinner(rs.getBoolean("s.subscribe_to_winner"));
 					ret.add(bean);
 				}
 				return ret;
@@ -257,7 +258,7 @@ public class EventsDao extends DAO {
 	}
 	
 	public List<AccountStatusBean> getUsers(int eventId) throws SQLException {
-		try (PreparedStatementHandle prep = (PreparedStatementHandle) getConnection().prepareStatement("SELECT a.twitch_id, a.username, a.email, a.views, a.followers, a.broadcaster_type, a.url, a.grade, a.logo, s.status, s.rank "
+		try (PreparedStatementHandle prep = (PreparedStatementHandle) getConnection().prepareStatement("SELECT a.twitch_id, a.username, a.email, a.views, a.followers, a.broadcaster_type, a.url, a.grade, a.logo, s.status, s.rank, s.subscribe_to_winner "
 						+ " FROM accounts a LEFT JOIN account_event_status s ON s.account_id = a.twitch_id WHERE s.event_id = ?")) {
 			prep.setInt(1, eventId);
 			try (ResultSet rs = prep.executeQuery()) {
@@ -275,6 +276,7 @@ public class EventsDao extends DAO {
 					bean.setLogo(rs.getString("a.logo"));
 					bean.setStatus(UserStatus.valueOf(rs.getString("s.status")));
 					bean.setRank(rs.getInt("s.rank"));
+					bean.setSubscribeToWinner(rs.getBoolean("s.subscribe_to_winner"));
 					ret.add(bean);
 				}
 				return ret;
@@ -367,14 +369,23 @@ public class EventsDao extends DAO {
 			prep.executeUpdate();
 		}
 	}
+	public void updateUserSubscriptionToWinner(int eventId, int accountId, boolean hasSubscribe) throws SQLException {
+		try (PreparedStatementHandle prep = (PreparedStatementHandle) getConnection().prepareStatement("UPDATE account_event_status SET subscribe_to_winner = ? WHERE account_id = ? AND event_id = ?")) {
+			prep.setBoolean(1, hasSubscribe);
+			prep.setInt(2, accountId);
+			prep.setInt(3, eventId);
+			prep.executeUpdate();
+		}
+	}
 	
 	public @Data class AccountStatusBean extends AccountBean {
 		public UserStatus status;
 		public Integer rank;
+		public boolean subscribeToWinner;
 	}
 	
 	public AccountStatusBean getRegistered(int eventId, int accountId) throws SQLException {
-		try (PreparedStatementHandle prep = (PreparedStatementHandle) getConnection().prepareStatement("SELECT a.twitch_id, a.username, a.email, a.views, a.followers, a.broadcaster_type, a.url, a.grade, s.status, a.logo, s.rank "
+		try (PreparedStatementHandle prep = (PreparedStatementHandle) getConnection().prepareStatement("SELECT a.twitch_id, a.username, a.email, a.views, a.followers, a.broadcaster_type, a.url, a.grade, s.status, a.logo, s.rank, s.subscribe_to_winner "
 						+ " FROM accounts a LEFT JOIN account_event_status s ON s.account_id = a.twitch_id WHERE s.event_id = ? AND a.twitch_id = ?")) {
 			prep.setInt(1, eventId);
 			prep.setInt(2, accountId);
@@ -392,6 +403,7 @@ public class EventsDao extends DAO {
 					bean.setLogo(rs.getString("a.logo"));
 					bean.status = UserStatus.valueOf(rs.getString("s.status"));
 					bean.rank = rs.getInt("s.rank");
+					bean.subscribeToWinner = rs.getBoolean("s.subscribe_to_winner");
 					return bean;
 				}
 				return null;
@@ -411,6 +423,33 @@ public class EventsDao extends DAO {
 			}
 		}
 	}
+
+    public AccountStatusBean getUserFromRank(int eventId, int rank) throws SQLException {
+        try (PreparedStatementHandle prep = (PreparedStatementHandle) getConnection().prepareStatement("SELECT a.twitch_id, a.username, a.email, a.views, a.followers, a.broadcaster_type, a.url, a.grade, s.status, a.logo, s.rank, s.subscribe_to_winner "
+                + " FROM accounts a LEFT JOIN account_event_status s ON s.account_id = a.twitch_id WHERE s.event_id = ? AND s.rank = ?")) {
+            prep.setInt(1, eventId);
+            prep.setInt(2, rank);
+            try (ResultSet rs = prep.executeQuery()) {
+                if (rs.next()) {
+                    AccountStatusBean bean = new AccountStatusBean();
+                    bean.setTwitchId(rs.getInt("a.twitch_id"));
+                    bean.setUsername(rs.getString("a.username"));
+                    bean.setEmail(rs.getString("a.email"));
+                    bean.setViews(rs.getInt("a.views"));
+                    bean.setFollowers(rs.getInt("a.followers"));
+                    bean.setBroadcasterType(BroadcasterType.valueOf(rs.getString("a.broadcaster_type")));
+                    bean.setUrl(rs.getString("a.url"));
+                    bean.setGrade(rs.getInt("a.grade"));
+                    bean.setLogo(rs.getString("a.logo"));
+                    bean.status = UserStatus.valueOf(rs.getString("s.status"));
+                    bean.rank = rs.getInt("s.rank");
+                    bean.subscribeToWinner = rs.getBoolean("s.subscribe_to_winner");
+                    return bean;
+                }
+                return null;
+            }
+        }
+    }
 	
 	public static @Data class AccountEventBean {
 		public EventBean event;
