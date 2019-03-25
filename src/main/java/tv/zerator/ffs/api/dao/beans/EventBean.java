@@ -7,11 +7,17 @@ public @Data class EventBean {
 	private String name, description;
 	private boolean reservedToAffiliates, reservedToPartners, isCurrent;
 	private Status status;
+	private RankingType rankingType;
 	
 	public enum Status {
 		OPEN,
 		CLOSED,
 		STARTED,
 		ENDED
+	}
+	
+	public enum RankingType {
+		SCORE_ASC,
+		SCORE_DESC
 	}
 }

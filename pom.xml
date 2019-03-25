@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>tv.zerator.ffs</groupId>
   <artifactId>api</artifactId>
-  <version>0.8.94</version>
+  <version>0.9.8-SNAPSHOT</version>
   <properties>
 		<api-lib-version>0.6.4</api-lib-version>
 	</properties>
@@ -22,14 +22,39 @@
 	</dependencies>
 	
 	<build>
+		<plugins>
+		    <plugin>
+			<groupId>org.codehaus.mojo</groupId>
+			<artifactId>exec-maven-plugin</artifactId>
+			<version>1.6.0</version>
+			<executions>
+			    <execution>
+				<id>run</id>
+				<phase>none</phase>
+				<goals>
+				    <goal>exec</goal>
+				</goals>
+				<configuration>
+				    <executable>java</executable>
+				    <workingDirectory>${basedir}/config</workingDirectory>
+				    <arguments>
+					<argument>-classpath</argument>
+					<classpath/>
+					<argument>tv.zerator.ffs.api.Main</argument>
+				    </arguments>
+				</configuration>
+			    </execution>
+			</executions>
+		    </plugin>
+		</plugins>
 		<pluginManagement>
 			<plugins>
 				<plugin>
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>3.2</version>
 					<configuration>
-						<source>1.7</source>
-						<target>1.7</target>
+						<source>1.8</source>
+						<target>1.8</target>
 						<compilerArgument />
 					</configuration>
 				</plugin>

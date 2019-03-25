@@ -72,6 +72,7 @@ public class EventsResource extends ServerResource {
 		data.setStatus(entity.status);
 		data.setMinimumViews(entity.minimum_views);
 		data.setMinimumFollowers(entity.minimum_followers);
+		data.setRankingType(entity.ranking_type);
 		
 		return new CreatedBean(mEvents.insert(data));
 	}
@@ -81,5 +82,6 @@ public class EventsResource extends ServerResource {
 		public boolean reserved_to_affiliates, reserved_to_partners;
 		public int minimum_views, minimum_followers;
 		public EventBean.Status status;
+		public EventBean.RankingType ranking_type;
 	}
 }

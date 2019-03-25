@@ -16,12 +16,14 @@ import tv.zerator.ffs.api.v1.resources.EventResource;
 import tv.zerator.ffs.api.v1.resources.EventRoundResource;
 import tv.zerator.ffs.api.v1.resources.EventRoundUserScoreResource;
 import tv.zerator.ffs.api.v1.resources.EventRoundsResource;
+import tv.zerator.ffs.api.v1.resources.EventUserRankResource;
 import tv.zerator.ffs.api.v1.resources.EventUserResource;
 import tv.zerator.ffs.api.v1.resources.EventUsersResource;
 import tv.zerator.ffs.api.v1.resources.EventsResource;
 import tv.zerator.ffs.api.v1.resources.LoginResource;
 import tv.zerator.ffs.api.v1.resources.MeEventsResource;
 import tv.zerator.ffs.api.v1.resources.MeResource;
+import tv.zerator.ffs.api.v1.resources.EventCheckSubscriptionResource;
 import tv.zerator.ffs.api.v1.verifiers.OAuthVerifier;
 
 public class ApiV1 extends ApiBase {
@@ -65,9 +67,11 @@ public class ApiV1 extends ApiBase {
 			break;
 		case USER:
 			router.attach("/event/{EVENT_ID}/register", EventRegisterResource.class);
+			router.attach("/event/{EVENT_ID}/check_subscription", EventCheckSubscriptionResource.class);
 			break;
 		case MODERATOR:
 			router.attach("/event/{EVENT_ID}/round/{ROUND_ID}/score/{USER_ID}", EventRoundUserScoreResource.class);
+			router.attach("/event/{EVENT_ID}/user/{USER_ID}/rank", EventUserRankResource.class);
 			break;
 		case ADMIN:
 			break;
