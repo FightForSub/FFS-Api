@@ -1,4 +1,4 @@
-# Web server config
+# Web server configs
 webserver.http.port=4000
 webserver.maxThreads=512
 
